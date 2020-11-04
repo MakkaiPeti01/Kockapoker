@@ -11,11 +11,11 @@ namespace Kockapoker
     {
         static void Main(string[] args)
         {
-            Dobas d = new Dobas();
+            Dobas d = new Dobas(1,1,1,2,3);
 
-            d.EgyDobas();
+           // d.EgyDobas();
             d.Kiiras();
-
+            Console.WriteLine(d.Erteke());
             Console.ReadKey();
         }
     }
