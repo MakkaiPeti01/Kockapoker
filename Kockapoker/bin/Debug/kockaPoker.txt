@@ -1,0 +1,9 @@
+Pár       - 2 egyforma
+2 Pár     - 2-2 egyforma
+Drill     - 3 egyforma
+Full      - 2 + 3 egyforma
+Póker     - 4 egyforma
+Kis sor   - 1..5
+Nagy sor  - 2..6
+Nagypóker - 5 egyforma
+Szemét    - bármi más
