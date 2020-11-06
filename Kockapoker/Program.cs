@@ -28,10 +28,25 @@ namespace Kockapoker
             //Ellenorzes();
             Dobas gep = new Dobas();
             Dobas ember = new Dobas();
+            Console.WriteLine("Gép:");
             gep.EgyDobas();
-            ember.EgyDobas();
             gep.Kiiras();
+
+            Console.WriteLine("Ember: ");
+            ember.EgyDobas();
             ember.Kiiras();
+            if (gep.Pont > ember.Pont) 
+            {
+                Console.WriteLine("Gép nyert");
+            }
+            else if (ember.Pont > gep.Pont)
+            {
+                Console.WriteLine("Ember nyert");
+            }
+            else
+            {
+                Console.WriteLine("Döntetlen");
+            }
             Console.ReadKey();
         }
     }

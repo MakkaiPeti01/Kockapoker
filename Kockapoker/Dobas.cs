@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,16 +11,22 @@ namespace Kockapoker
     {
         int[] kockak = new int[5];
         private string eredmeny;
-        public string Eredmeny { 
-            get 
+        public string Eredmeny
+        {
+            get
             {
                 return eredmeny;
             }
         }
+        private int pont;
+        public int Pont { get { return pont; } }
+
+
         public Dobas()
         {
 
         }
+
         public Dobas(int k1, int k2, int k3, int k4, int k5)
         {
             kockak[0] = k1;
@@ -28,112 +34,102 @@ namespace Kockapoker
             kockak[2] = k3;
             kockak[3] = k4;
             kockak[4] = k5;
+
             eredmeny = Erteke();
         }
+
         public void EgyDobas()
         {
-            Random vel = new Random();
+            Random vel = new Random(Guid.NewGuid().GetHashCode());
             for (int i = 0; i < kockak.Length; i++)
             {
                 kockak[i] = vel.Next(1, 7);
             }
+
             eredmeny = Erteke();
         }
 
         public void Kiiras()
         {
-            foreach (var i in kockak)
+            foreach (var k in kockak)
             {
-                Console.Write($"{i}");
+                Console.Write($"{k};");
             }
-            Console.WriteLine($"-> {eredmeny}");
+            Console.WriteLine($" -> {eredmeny}");
         }
 
-        public string Erteke()
-        {  
-            Dictionary<int, int> eredmeny = new Dictionary<int, int>();
+        private string Erteke()
+        {
+            Dictionary<int, int> eredemeny = new Dictionary<int, int>();
+
             for (int i = 1; i <= 6; i++)
             {
-                eredmeny.Add(i, 0);
+                eredemeny.Add(i, 0);
             }
-            foreach (var i in kockak)
+
+            foreach (var k in kockak)
             {
-                eredmeny[i]++;
+                eredemeny[k]++;
             }
-            /*A dicból lekérjük az 1 Valuenal nagyobb elemeket!
-             * Első eset ha egy elem marad: 5-nagypoker, 4-poker, 3-drill, 2-pár
-             * Hanyas (Key) érték határozza meg pl 4 es póker
-             * Második eset 2 elem marad
-             * Value 3 és 2 --> Full
-             * Value 2 és 2 --> Két pár
-             * Harmadik eset nem marad egy sem
-             * Ha key 6 == 0 kis sor vagy key 1 == 0 nagy sor
-             * Minden más --> szemét
-             */
-            var result = (from e in eredmeny
-                         where e.Value > 1
-                         orderby e.Value descending
+
+            // A dic-ből lekérdezzük az 1 Value-nál nagyobb elemeket
+            // Első eset ha egy elem marad (Value értéket nézzük):
+            //   - 5 -> nagypóker
+            //   - 4 -> póker
+            //   - 3 -> drill
+            //   - 2 -> pár
+            //  Key érték mondja meg, hogy hányas -> 4 póker 
+            // Második eset két elem marad:
+            //   - Value: 3 és 2 -> Full
+            //   - Value: 2 és 2 -> 2 pár
+            // Harmadik eset nem marad egy sem, akkor
+            //   - Ha Key:6 == 0 -> Kissor
+            //   - Ha Key:1 == 0 -> Nagysor
+            // Minden más esetben -> Szemét (moslék)
+
+            var result = (from e in eredemeny
+                          orderby e.Value descending
+                          where e.Value > 1
                           select new { Szam = e.Key, Db = e.Value }).ToList();
+
             Console.WriteLine();
-            int db = result.Count;
-            if (db == 1)
-            {
-                switch (result[0].Db)
-                {
-                    case 5:
-                        return $" {result[0].Szam} Nagypóker";
-                    case 4:
-                        return $"{result[0].Szam} Póker";
-                    case 3:
-                        return $"{result[0].Szam} Drill";
-                    case 2:
-                        return $"{result[0].Szam} Pár";
-                    default:
-                        break;
-                }
-            }
-            //vagy 
-            if (db == 1)
+            int darab = result.Count;
+            if (darab == 1)
             {
                 string[] egyes = new string[] { "", "", "Pár", "Drill", "Póker", "Nagypóker" };
+
+                int[] pontok = new int[] { 0, 0, 10, 300, 600, 900 };
+                pont = pontok[result[0].Db] + result[0].Szam;
+
                 return $"{result[0].Szam} {egyes[result[0].Db]}";
             }
-            else if (db == 2)
+            else if (darab == 2)
             {
                 if (result[0].Db == 3 && result[1].Db == 2)
                 {
-                    if (result[0].Szam > result[1].Szam)
-                    {
-                        return $"{result[0].Szam}-{result[1].Szam} Full";
-                    }
-                    else
-                    {
-                        return $"{result[1].Szam}-{result[0].Szam} Full";
-                    }
+                    pont = 500 + (result[0].Szam * 10 + result[1].Szam);
+                    return $"{result[0].Szam}-{result[1].Szam} Full";
                 }
                 else
                 {
-                    if (result[0].Szam > result[1].Szam)
-                    {
-                        return $"{result[0].Szam}-{result[1].Szam} Pár";
-                    }
-                    else
-                    {
-                        return $"{result[1].Szam}-{result[0].Szam} Pár";
-                    }
+                    pont = 100 + (result[0].Szam * 10 + result[1].Szam);
+                    return $"{result[1].Szam}-{result[0].Szam} Pár";
                 }
             }
             else
             {
-                if (eredmeny[6] == 0)
+                if (eredemeny[6] == 0)
                 {
-                    return "Kis sor";
+                    pont = 700;
+                    return "Kissor";
                 }
-                else if (eredmeny[1] == 0)
+                else if (eredemeny[1] == 0)
                 {
-                    return "Nagy sor";
+                    pont = 800;
+                    return "Nagysor";
                 }
             }
+            pont = 1;
             return "Szemét";
         }
     }
